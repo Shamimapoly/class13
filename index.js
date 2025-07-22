@@ -1,51 +1,44 @@
-const express =require('express')
-const app =express()
-const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
-const port=8000
-const cors=require('cors')
-const cloudinary =require('cloudinary').v2
+const express = require("express");
+const app = express();
+const multer = require("multer");
+const fs = require("fs");
+const upload = multer({ dest: "uploads/" });
+const port = 8000;
+const cors = require("cors");
+const cloudinary = require("cloudinary").v2;
+app.use(express.json());
+app.use(cors());
 
 
+cloudinary.config({
+  cloud_name: "dz6mb5kkp",
+  api_key: "575795312266681",
+  api_secret: "hJ3UDGIs4GhB8S6F4iBJ-AYTuKs",
+});
 
-
-    
-    cloudinary.config({ 
-        cloud_name: 'dz6mb5kkp', 
-        api_key: '575795312266681', 
-        api_secret: 'hJ3UDGIs4GhB8S6F4iBJ-AYTuKs' 
+app.post("/sendimage", upload.single("avatar"), async (req, res) => {
+  try {
+    const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+      public_id: `image_${Date.now()}`, // unique name to avoid overwrite
     });
-    
-    
-// --------all middleware-----//
-app.use(express.json())
-app.use(cors())
-// ------api---------------//
-app.post('/sendimage',upload.single('avatar'), async(req, res)=>{
 
-     const uploadResult = await cloudinary.uploader.upload(
-           req.file.path, {
-               public_id: 'shoes',
-           }
-       )
-       .catch((error) => {
-           console.log(error);
-       });
-    
-    console.log(uploadResult);
+    // Optional: delete the file after upload
+    // fs.unlink(req.file.path, (err) => {
+    //   if (err) console.error("Failed to delete local file:", err);
+    // });
 
+    // ✅ Send the Cloudinary image URL in the response
+    res.status(200).json({
+      message: "Image uploaded successfully",
+      url: uploadResult.secure_url,
+    });
 
-    res.status(200).send(req.file.path)
-    // res.status(200).json({ url: uploadResult.secure_url });
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    res.status(500).json({ error: "Image upload failed." });
+  }
+});
 
-})
-// -----server running-------///
-app.listen(port,(err)=>{
-    if(err){
-        console.log(err);
-        
-    }else{
-        console.log(`this server is running at${port}`);
-        
-    }
-})
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
+});
