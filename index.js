@@ -9,7 +9,6 @@ const cloudinary = require("cloudinary").v2;
 app.use(express.json());
 app.use(cors());
 
-
 cloudinary.config({
   cloud_name: "dz6mb5kkp",
   api_key: "575795312266681",
@@ -21,7 +20,11 @@ app.post("/sendimage", upload.single("avatar"), async (req, res) => {
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
       public_id: `image_${Date.now()}`, // unique name to avoid overwrite
     });
-  console.log(uploadResult);
+    console.log(uploadResult);
+    res.status(200).json({
+      message: "Image uploaded successfully",
+      url: uploadResult.secure_url,
+    });
   } catch (error) {
     console.error("Cloudinary upload error:", error);
     res.status(500).json({ error: "Image upload failed." });
