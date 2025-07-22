@@ -21,18 +21,7 @@ app.post("/sendimage", upload.single("avatar"), async (req, res) => {
     const uploadResult = await cloudinary.uploader.upload(req.file.path, {
       public_id: `image_${Date.now()}`, // unique name to avoid overwrite
     });
-
-    // Optional: delete the file after upload
-    // fs.unlink(req.file.path, (err) => {
-    //   if (err) console.error("Failed to delete local file:", err);
-    // });
-
-    // ✅ Send the Cloudinary image URL in the response
-    res.status(200).json({
-      message: "Image uploaded successfully",
-      url: uploadResult.secure_url,
-    });
-
+  console.log(uploadResult);
   } catch (error) {
     console.error("Cloudinary upload error:", error);
     res.status(500).json({ error: "Image upload failed." });
